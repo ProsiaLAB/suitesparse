@@ -1,2 +1,2 @@
 # umfpack
-A subset of safe UMFPACK bindings in Rust.
+A subset of safe UMFPACK bindings for Rust.
