@@ -1,2 +1,3 @@
-# umfpack
-A subset of safe UMFPACK bindings for Rust.
+# suitesparse
+
+A subset of safe bindings to the [SuiteSparse](https://github.com/DrTimothyAldenDavis/SuiteSparse/) library for Rust.
