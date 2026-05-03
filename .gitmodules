@@ -1,0 +1,3 @@
+[submodule "suitesparse-sys/vendor/suitesparse"]
+	path = suitesparse-sys/vendor/suitesparse
+	url = https://github.com/DrTimothyAldenDavis/SuiteSparse
