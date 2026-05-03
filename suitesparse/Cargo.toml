@@ -1,0 +1,31 @@
+[package]
+name = "suitesparse"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+suitesparse-sys = { path = "../suitesparse-sys" }
+
+[features]
+default = ["klu", "amd", "colamd", "btf"]
+# Forwarding features to suitesparse-sys
+static_libraries = ["suitesparse-sys/static_libraries"]
+build_vendor = ["suitesparse-sys/build_vendor"]
+openmp = ["suitesparse-sys/openmp"]
+mongoose = ["suitesparse-sys/mongoose"]
+amd = ["suitesparse-sys/amd"]
+btf = ["suitesparse-sys/btf"]
+camd = ["suitesparse-sys/camd"]
+ccolamd = ["suitesparse-sys/ccolamd"]
+colamd = ["suitesparse-sys/colamd"]
+cholmod = ["suitesparse-sys/cholmod"]
+cxsparse = ["suitesparse-sys/cxsparse"]
+ldl = ["suitesparse-sys/ldl"]
+klu = ["suitesparse-sys/klu"]
+umfpack = ["suitesparse-sys/umfpack"]
+paru = ["suitesparse-sys/paru"]
+rbio = ["suitesparse-sys/rbio"]
+spqr = ["suitesparse-sys/spqr"]
+spex = ["suitesparse-sys/spex"]
+graphblas = ["suitesparse-sys/graphblas"]
+lagraph = ["suitesparse-sys/lagraph"]

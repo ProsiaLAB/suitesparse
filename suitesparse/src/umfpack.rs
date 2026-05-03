@@ -1,8 +1,6 @@
-#![allow(clippy::cast_possible_wrap)]
-#![allow(clippy::inline_always)]
-
 use std::ffi::c_void;
 
+use crate::sparse::{CscMatrix, SparseTriplet};
 use suitesparse_sys::umfpack_dl_defaults;
 use suitesparse_sys::{
     UMFPACK_A, UMFPACK_CONTROL, UMFPACK_INFO, UMFPACK_OK, umfpack_dl_free_numeric,
@@ -162,21 +160,7 @@ impl Drop for UmfpackLU {
     }
 }
 
-#[derive(Debug, Default)]
-pub struct CscMatrix {
-    pub col_ptr: Vec<i64>,
-    pub row_ind: Vec<i64>,
-    pub values: Vec<f64>,
-}
-
 impl CscMatrix {
-    #[inline(always)]
-    pub fn clear(&mut self) {
-        self.col_ptr.clear();
-        self.row_ind.clear();
-        self.values.clear();
-    }
-
     #[inline(always)]
     pub fn assemble(&mut self, n: usize, nnz: usize, triplet: &SparseTriplet) -> i32 {
         let status = unsafe {
@@ -204,29 +188,6 @@ impl CscMatrix {
             self.values.set_len(nnz);
         }
         0
-    }
-}
-
-#[derive(Debug, Default)]
-pub struct SparseTriplet {
-    pub rows: Vec<i64>,
-    pub cols: Vec<i64>,
-    pub vals: Vec<f64>,
-}
-
-impl SparseTriplet {
-    #[inline(always)]
-    pub fn clear(&mut self) {
-        self.rows.clear();
-        self.cols.clear();
-        self.vals.clear();
-    }
-
-    #[inline(always)]
-    pub fn add(&mut self, row: usize, col: usize, val: f64) {
-        self.rows.push(row as i64);
-        self.cols.push(col as i64);
-        self.vals.push(val);
     }
 }
 
@@ -276,6 +237,63 @@ impl Default for UmfpackInfo {
     fn default() -> Self {
         Self {
             inner: [0.0; UMFPACK_INFO as usize],
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_umfpack_lu() {
+        let n = 5;
+        let mut triplet = SparseTriplet::default();
+        // A simple 5x5 matrix
+        let entries = [
+            (0, 0, 2.),
+            (0, 1, 3.),
+            (1, 0, 3.),
+            (1, 2, 4.),
+            (1, 4, 6.),
+            (2, 1, -1.),
+            (2, 2, -3.),
+            (2, 3, 2.),
+            (3, 2, 1.),
+            (4, 1, 4.),
+            (4, 2, 2.),
+            (4, 4, 1.),
+        ];
+        for (r, c, v) in entries {
+            triplet.add(r, c, v);
+        }
+
+        let mut csc = CscMatrix {
+            col_ptr: vec![0; n + 1],
+            row_ind: vec![0; entries.len()],
+            values: vec![0.0; entries.len()],
+        };
+
+        let status = csc.assemble(n, entries.len(), &triplet);
+        assert_eq!(status, 0);
+
+        let mut lu = UmfpackLU::new();
+        let control = UmfpackControl::new();
+        let mut info = UmfpackInfo::default();
+
+        let status = lu.factorize(n, &csc, &control, &mut info);
+        assert_eq!(status, 0);
+
+        let b = vec![8., 45., -3., 3., 19.];
+        let mut x = vec![0.0; n];
+        let mut r = b.clone();
+
+        let status = lu.solve(&mut r, &mut x, &csc, &control, &mut info);
+        assert_eq!(status, 0);
+
+        let expected = [1., 2., 3., 4., 5.];
+        for (a, b) in x.iter().zip(expected.iter()) {
+            assert!((a - b).abs() < 1e-9, "Expected {b}, got {a}");
         }
     }
 }

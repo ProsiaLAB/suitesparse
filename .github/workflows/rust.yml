@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: -D warnings
+  RUSTDOCFLAGS: -D warnings
+
+jobs:
+  rustfmt:
+    name: Rustfmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+  test:
+    name: Test - ${{ matrix.os }} - vendor:${{ matrix.vendor }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, macos-latest ]
+        vendor: [ true, false ]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install shared dependencies (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libclang-dev cmake
+
+      - name: Install system SuiteSparse (Linux)
+        if: matrix.os == 'ubuntu-latest' && matrix.vendor == false
+        run: sudo apt-get install -y libsuitesparse-dev
+
+      - name: Install system SuiteSparse (macOS)
+        if: matrix.os == 'macos-latest' && matrix.vendor == false
+        run: brew install suite-sparse
+
+      - name: Install BLAS/LAPACK for vendor build (Linux)
+        if: matrix.os == 'ubuntu-latest' && matrix.vendor == true
+        run: sudo apt-get install -y libblas-dev liblapack-dev libopenblas-dev
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.vendor }}
+
+      - name: Check
+        run: |
+          if [ "${{ matrix.vendor }}" = "true" ]; then
+            cargo check --workspace --all-features
+          else
+            cargo check --workspace
+          fi
+
+      - name: Test
+        run: |
+          if [ "${{ matrix.vendor }}" = "true" ]; then
+            cargo test --workspace --all-features
+          else
+            cargo test --workspace
+          fi

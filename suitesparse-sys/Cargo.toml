@@ -1,0 +1,80 @@
+[package]
+name = "suitesparse-sys"
+version = "0.1.4"
+edition = "2021"
+description = "sys crate for suitesparse library"
+license = "MIT"
+authors = [
+    "Martin Robinson <martinjrobins@gmail.com>",
+    "Richard Lincoln",
+    "S. Maitrey",
+]
+repository = "https://github.com/kmaitreys/suitesparse"
+links = "suitesparse"
+exclude = [
+    "vendor/LAGraph/data",
+    "vendor/LAGraph/papers",
+    "vendor/LAGraph/src/benchmark",
+    "vendor/LAGraph/src/test",
+    "vendor/MATLAB_Tools",
+    "vendor/.*",
+    "vendor/SPEX/ExampleMats",
+    "vendor/GraphBLAS/logo",
+    "vendor/GraphBLAS/Doc",
+    "vendor/GraphBLAS/Demo",
+    "vendor/GraphBLAS/Test",
+    "vendor/GraphBLAS/GraphBLAS/demo",
+    "vendor/GraphBLAS/GraphBLAS/test",
+    "vendor/GraphBLAS/GraphBLAS/@GrB",
+    "vendor/CXSparse/Demo",
+    "vendor/CXSparse/Doc",
+    "vendor/CXSparse/Matrix",
+    "vendor/CXSparse/Matlab",
+    "vendor/Mongoose/MATLAB",
+    "vendor/Mongoose/Matrix",
+    "vendor/CHOLMOD/SuiteSparse_metis/graphs",
+    "vendor/SPQR/Doc",
+    "vendor/SPQR/MATLAB",
+    "vendor/SPQR/Matrix",
+    "vendor/UMFPACK/Doc",
+    "vendor/UMFPACK/Demo",
+    "vendor/ParU/Matrix",
+    "vendor/ssget/files",
+    "vendor/CSparse/Matrix",
+    "vendor/CSparse/MATLAB",
+    "vendor/**/*.pdf",
+]
+
+[dependencies]
+
+[build-dependencies]
+bindgen = "0.72.1"
+cmake = "0.1.58"
+pkg-config = "0.3.33"
+
+[features]
+default = ["klu", "amd", "colamd", "btf"]
+static_libraries = []
+build_vendor = []
+openmp = []
+mongoose = []
+amd = []
+btf = []
+camd = []
+ccolamd = []
+colamd = []
+cholmod = []
+cxsparse = []
+ldl = []
+klu = []
+umfpack = []
+paru = []
+rbio = []
+spqr = []
+spex = []
+graphblas = []
+lagraph = []
+
+[package.metadata.docs.rs]
+
+features = ["build_vendor", "klu", "amd", "colamd", "btf"]
