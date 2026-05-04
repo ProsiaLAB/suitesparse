@@ -345,12 +345,8 @@ fn main() -> Result<(), String> {
         }
     }
 
-    if cfg!(feature = "openmp") {
-        if cfg!(target_os = "linux") {
-            println!("cargo:rustc-link-lib=gomp");
-        }
-        // macOS OpenMP linking can be complex with Homebrew (libomp vs libgomp),
-        // and often requires extra flags that might not be easily handled here.
+    if cfg!(feature = "openmp") && cfg!(target_os = "linux") {
+        println!("cargo:rustc-link-lib=gomp");
     }
 
     println!("cargo:rerun-if-changed=build.rs");
